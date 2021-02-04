@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nobl9-agent-boxboat-nickens-prom-nickens-prom
+  namespace: default
+type: Opaque
+stringData:
+  client_id: 0oaf2bs2x4M6nK8sQ416
+  client_secret: BXHczcOjdNXQbOMYl53vjZvdOTRFDOw7Vnulb3vB
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nobl9-agent-boxboat-nickens-prom-nickens-prom
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      nobl9-agent-name: nickens-prom
+      nobl9-agent-project: nickens-prom
+      nobl9-agent-organization: boxboat
+  template:
+    metadata:
+      labels:
+        nobl9-agent-name: nickens-prom
+        nobl9-agent-project: nickens-prom
+        nobl9-agent-organization: boxboat
+    spec:
+      containers:
+        - name: agent-container
+          image: nobl9/agent:0.13.0
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: ".5"
+          env:
+            - name: N9_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: nobl9-agent-boxboat-nickens-prom-nickens-prom
+            - name: N9_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: nobl9-agent-boxboat-nickens-prom-nickens-prom
+            - name: N9_AUTH_SERVER
+              value: "auseg9kiegWKEtJZC416"
+            - name: N9_INTAKE_URL
+              value: "https://app.nobl9.com/api/input"
+            # N9_ALLOWED_URLS is an optional safety parameter that limits the URLs that an Agent is able to query
+            # for metrics. URLs defined in the Nobl9 app are prefix-compared against the N9_ALLOWED_URLS list of
+            # comma separated URLs.
+            # - name: N9_ALLOWED_URLS
+            #   value: "http://172.16.0.2/api/v1/query,http://172.16.0.3"
